@@ -1,5 +1,6 @@
-﻿using AoC2025.Day2;
-using System.Text;
+﻿using System.Text;
+
+namespace AoC2025.Day2;
 
 internal class Program
 {

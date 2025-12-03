@@ -1,4 +1,4 @@
-﻿using AoC2025.Day1;
+﻿namespace AoC2025.Day1;
 
 internal class Program
 {

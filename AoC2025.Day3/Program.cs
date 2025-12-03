@@ -1,5 +1,4 @@
-﻿using AoC2025.Day3;
-using System.Data.SqlTypes;
+﻿namespace AoC2025.Day3;
 
 internal class Program
 {
@@ -9,11 +8,7 @@ internal class Program
         var banks = InputParser.ParseInput();
 
         SolveA(banks);
-        var now = DateTime.Now;
         SolveB(banks);
-        var end = DateTime.Now;
-        var duration = end - now;
-        Console.WriteLine(duration.TotalMilliseconds);
     }
 
     private static void SolveA(IEnumerable<string> banks)
