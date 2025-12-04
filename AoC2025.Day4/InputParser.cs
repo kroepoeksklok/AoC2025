@@ -1,0 +1,36 @@
+﻿using AoC2025.Day4.Properties;
+
+namespace AoC2025.Day4;
+
+internal static class InputParser
+{
+    public static char[,] ParseInput()
+    {
+
+        var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay4a);
+//        var inputString =
+//@"..@@.@@@@.
+//@@@.@.@.@@
+//@@@@@.@.@@
+//@.@@@@..@.
+//@@.@@@@.@@
+//.@@@@@@@.@
+//.@.@.@.@@@
+//@.@@@.@@@@
+//.@@@@@@@@.
+//@.@.@@@.@.";
+
+        var lines = inputString.Split(Environment.NewLine);
+        char[,] paperRollLocations = new char[lines.Length,lines.First().Length];
+
+        for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
+        {
+            for(int symbol = 0; symbol < lines[lineNumber].Length; symbol++)
+            {
+                paperRollLocations[lineNumber,symbol] = lines[lineNumber][symbol];
+            }
+        }
+
+        return paperRollLocations;
+    }
+}
