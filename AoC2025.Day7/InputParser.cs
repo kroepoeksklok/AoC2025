@@ -1,6 +1,4 @@
-﻿//using AoC2025.Day7.Properties;
-using AoC2025.Day7.Properties;
-using System.Text;
+﻿using AoC2025.Day7.Properties;
 
 namespace AoC2025.Day7;
 
@@ -8,7 +6,6 @@ internal static class InputParser
 {
     public static char[,] ParseInput()
     {
-
         var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay7a);
         //        var inputString =
         //@".......S.......
