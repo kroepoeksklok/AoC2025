@@ -1,0 +1,44 @@
+﻿//using AoC2025.Day7.Properties;
+using AoC2025.Day7.Properties;
+using System.Text;
+
+namespace AoC2025.Day7;
+
+internal static class InputParser
+{
+    public static char[,] ParseInput()
+    {
+
+        var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay7a);
+        //        var inputString =
+        //@".......S.......
+        //...............
+        //.......^.......
+        //...............
+        //......^.^......
+        //...............
+        //.....^.^.^.....
+        //...............
+        //....^.^...^....
+        //...............
+        //...^.^...^.^...
+        //...............
+        //..^...^.....^..
+        //...............
+        //.^.^.^.^.^...^.
+        //...............";
+
+        var lines = inputString.Split(Environment.NewLine);
+        char[,] manifold = new char[lines.Length, lines.First().Length];
+
+        for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
+        {
+            for (int symbol = 0; symbol < lines[lineNumber].Length; symbol++)
+            {
+                manifold[lineNumber, symbol] = lines[lineNumber][symbol];
+            }
+        }
+
+        return manifold;
+    }
+}
