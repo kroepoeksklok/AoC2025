@@ -5,7 +5,7 @@ namespace AoC2025.Day8;
 
 internal static class InputParser
 {
-    public static IEnumerable<JunctionBox> ParseInput()
+    public static IList<JunctionBox> ParseInput()
     {
 
         //var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay8a);
@@ -46,12 +46,13 @@ internal static class InputParser
 
 public sealed record JunctionBox(int X, int Y, int Z)
 {
-    public int DistanceTo(JunctionBox junctionBox)
+    public decimal DistanceTo(JunctionBox junctionBox)
     {
         var xCoordinate = Math.Pow((X - junctionBox.X), 2);
         var yCoordinate = Math.Pow((Y - junctionBox.Y), 2);
         var zCoordinate = Math.Pow((Z - junctionBox.Z), 2);
         var distance = Math.Sqrt(xCoordinate + yCoordinate + zCoordinate);
-        return (int) distance;
+
+        return (decimal) distance;
     }
 };
