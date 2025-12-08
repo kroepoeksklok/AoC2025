@@ -2,22 +2,97 @@
 
 internal class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         Console.WriteLine("Hello, World!");
         var junctionBoxes = InputParser.ParseInput();
 
         SolveA(junctionBoxes);
+        SolveB(junctionBoxes);
     }
 
     public static void SolveA(IList<JunctionBox> junctionBoxes)
     {
-        List<JunctionBoxDistance> distances = [];
+        List<JunctionBoxDistance> orderedDistances = CalculateAllDistances(junctionBoxes);
+        List<Circuit> circuits = [];
+        int connectionsAdded = 0;
 
+        foreach (var orderedDistance in orderedDistances)
+        {
+            if (connectionsAdded == 1000)
+            {
+                break;
+            }
+
+            var containingCircuits = GetCircuitsThatContainAtLeastOneJunctionBox(circuits, orderedDistance);
+
+            if (containingCircuits.Count == 0)
+            {
+                CreateNewCircuit(circuits, orderedDistance);
+                connectionsAdded++;
+            }
+            else if (containingCircuits.Count == 1)
+            {
+                AddJunctionBoxesToContainingCircuit(orderedDistance, containingCircuits);
+                connectionsAdded++;
+            }
+            else
+            {
+                MergeCircuits(circuits, orderedDistance, containingCircuits);
+
+                connectionsAdded++;
+            }
+        }
+
+        var x = circuits
+            .OrderByDescending(c => c.JunctionBoxes.Count)
+            .Select(c => c.JunctionBoxes.Count)
+            .Take(3)
+            .Aggregate(1, (a, b) => a * b);
+
+        Console.WriteLine($"8A answer: {x}");
+    }
+
+    public static void SolveB(IList<JunctionBox> junctionBoxes)
+    {
+        List<JunctionBoxDistance> orderedDistances = CalculateAllDistances(junctionBoxes);
+        List<Circuit> circuits = [];
+
+        foreach (var orderedDistance in orderedDistances)
+        {
+            var containingCircuits = GetCircuitsThatContainAtLeastOneJunctionBox(circuits, orderedDistance);
+
+            if (containingCircuits.Count == 0)
+            {
+                CreateNewCircuit(circuits, orderedDistance);
+            }
+            else if (containingCircuits.Count == 1)
+            {
+                AddJunctionBoxesToContainingCircuit(orderedDistance, containingCircuits);
+            }
+            else
+            {
+                MergeCircuits(circuits, orderedDistance, containingCircuits);
+            }
+
+            var circuitWithAllBoxes = circuits.FirstOrDefault(c => c.JunctionBoxes.Count == junctionBoxes.Count);
+            if (circuitWithAllBoxes != null)
+            {
+                var answer = (long)orderedDistance.FirstJunctionBox.X * orderedDistance.SecondJunctionBox.X;
+
+                Console.WriteLine($"8B answer: {answer}");
+                break;
+            }
+        }
+    }
+
+    private static List<JunctionBoxDistance> CalculateAllDistances(IList<JunctionBox> junctionBoxes)
+    {
+        List<JunctionBoxDistance> distances = [];
         for (int i = 0; i < junctionBoxes.Count; i++)
         {
             var firstJunctionBox = junctionBoxes[i];
-            for (int j = i+1; j < junctionBoxes.Count; j++) 
+            for (int j = i + 1; j < junctionBoxes.Count; j++)
             {
                 var secondJunctionBox = junctionBoxes[j];
 
@@ -26,87 +101,56 @@ internal class Program
             }
         }
 
-        List<Circuit> circuits = new List<Circuit>();
-        int connectionsAdded = 0;
-
-        var orderedDistances = distances.OrderBy(d => d.Distance);
-        foreach (var orderedDistance in orderedDistances)
-        {
-            // if (connectionsAdded == 10)
-            // {
-            //     break;
-            // }
-            
-            Console.WriteLine($"From ({orderedDistance.FirstJunctionBox.X},{orderedDistance.FirstJunctionBox.Y},{orderedDistance.FirstJunctionBox.Z}) to ({orderedDistance.SecondJunctionBox.X},{orderedDistance.SecondJunctionBox.Y},{orderedDistance.SecondJunctionBox.Z}): {orderedDistance.Distance}");
-
-            // bool containsOneJunctionBox = false;
-            // bool containsBothJunctionBoxes = false;
-
-            // Circuit containingCircuit = null!;
-
-            // foreach (var circuit in circuits) {
-            //     var containsFirstJunctionBox = circuit.ContainsJunctionBox(orderedDistance.FirstJunctionBox);
-            //     var containsSecondJunctionBox = circuit.ContainsJunctionBox(orderedDistance.SecondJunctionBox);
-
-            //     if(
-            //         (containsFirstJunctionBox && !containsSecondJunctionBox) ||
-            //         (!containsFirstJunctionBox && containsSecondJunctionBox)) 
-            //     {
-            //         containsBothJunctionBoxes = false;
-            //         containsOneJunctionBox = true;
-            //         containingCircuit = circuit;
-
-            //         break;
-            //     }
-
-            //     if(containsFirstJunctionBox && containsSecondJunctionBox) {
-            //         containsBothJunctionBoxes = true;
-            //         containsOneJunctionBox = false;
-
-            //         break;
-            //     }
-            // }
-
-            // if(containsBothJunctionBoxes) 
-            // {
-            //     continue;
-            // } 
-            // else if(containsOneJunctionBox && containingCircuit != null)
-            // {
-            //     containingCircuit.JunctionBoxes.Add(orderedDistance.FirstJunctionBox);
-            //     containingCircuit.JunctionBoxes.Add(orderedDistance.SecondJunctionBox);
-            //     connectionsAdded++;
-            // }
-            // else 
-            // {
-            //     containingCircuit = new Circuit();
-            //     containingCircuit.JunctionBoxes.Add(orderedDistance.FirstJunctionBox);
-            //     containingCircuit.JunctionBoxes.Add(orderedDistance.SecondJunctionBox);
-            //     circuits.Add(containingCircuit);
-            //     connectionsAdded++;
-            // }
-        }
-
-        // var orderedCircuits = circuits
-        //     .OrderByDescending(c => c.JunctionBoxes.Count);
-
-        // foreach(var circuit in orderedCircuits) {
-        //     Console.WriteLine($"{circuit.JunctionBoxes.Count}");
-        // }
-
-        // var x = circuits
-        //     .OrderByDescending(c => c.JunctionBoxes.Count)
-        //     .Select(c => c.JunctionBoxes.Count)
-        //     .Take(3)
-        //     .Aggregate(1, (a, b) => a * b);
-
-        // // 9614 -> too low
-        // Console.WriteLine($"8A answer: {x}");
+        return distances.OrderBy(d => d.Distance).ToList();
     }
 
-    public static void SolveB()
+    private static List<Circuit> GetCircuitsThatContainAtLeastOneJunctionBox(List<Circuit> circuits, JunctionBoxDistance orderedDistance)
     {
+        List<Circuit> containingCircuits = [];
+        foreach (var circuit in circuits.OrderByDescending(c => c.JunctionBoxes.Count))
+        {
+            var containsFirstJunctionBox = circuit.ContainsJunctionBox(orderedDistance.FirstJunctionBox);
+            var containsSecondJunctionBox = circuit.ContainsJunctionBox(orderedDistance.SecondJunctionBox);
 
+            if (containsFirstJunctionBox || containsSecondJunctionBox)
+            {
+                containingCircuits.Add(circuit);
+            }
+        }
+
+        return containingCircuits;
+    }
+
+    private static void CreateNewCircuit(List<Circuit> circuits, JunctionBoxDistance orderedDistance)
+    {
+        var circuit = new Circuit();
+        circuit.JunctionBoxes.Add(orderedDistance.FirstJunctionBox);
+        circuit.JunctionBoxes.Add(orderedDistance.SecondJunctionBox);
+        circuits.Add(circuit);
+    }
+
+    private static void AddJunctionBoxesToContainingCircuit(JunctionBoxDistance orderedDistance, List<Circuit> containingCircuits)
+    {
+        var containingCircuit = containingCircuits[0];
+        containingCircuit.JunctionBoxes.Add(orderedDistance.FirstJunctionBox);
+        containingCircuit.JunctionBoxes.Add(orderedDistance.SecondJunctionBox);
+    }
+
+    private static void MergeCircuits(List<Circuit> circuits, JunctionBoxDistance orderedDistance, List<Circuit> containingCircuits)
+    {
+        var newCircuit = new Circuit();
+        foreach (var containingCircuit in containingCircuits)
+        {
+            foreach (var junctionBox in containingCircuit.JunctionBoxes)
+            {
+                newCircuit.JunctionBoxes.Add(junctionBox);
+            }
+            circuits.Remove(containingCircuit);
+        }
+
+        newCircuit.JunctionBoxes.Add(orderedDistance.FirstJunctionBox);
+        newCircuit.JunctionBoxes.Add(orderedDistance.SecondJunctionBox);
+        circuits.Add(newCircuit);
     }
 
     private record JunctionBoxDistance(JunctionBox FirstJunctionBox, JunctionBox SecondJunctionBox, decimal Distance);
