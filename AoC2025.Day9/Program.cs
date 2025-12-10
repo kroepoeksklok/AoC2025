@@ -2,14 +2,14 @@
 
 internal class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         Console.WriteLine("Hello, World!");
-        var coordinates = InputParser.ParseInput();
+        var coordinatesAndEdges = InputParser.ParseInput();
 
-        var surfaces = CreateSurfaces(coordinates.Coordinates);
+        var surfaces = CreateSurfaces(coordinatesAndEdges.Coordinates);
         SolveA(surfaces);
-        SolveB(surfaces, coordinates.Edges);
+        SolveB(surfaces, coordinatesAndEdges.Edges);
     }
 
     private static void SolveA(IEnumerable<Surface> surfaces)

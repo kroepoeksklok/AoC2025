@@ -1,13 +1,10 @@
 ﻿using AoC2025.Day9.Properties;
-using System;
-using System.ComponentModel;
-using System.Text;
 
 namespace AoC2025.Day9;
 
 internal static class InputParser
 {
-    public static CoordinatesAndScanLines ParseInput()
+    public static CoordinatesAndEdges ParseInput()
     {
 
         var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay9a);
@@ -39,7 +36,7 @@ internal static class InputParser
             coordinates.Add(currentCoordinate);
         }
 
-        return new CoordinatesAndScanLines(coordinates, edges);
+        return new CoordinatesAndEdges(coordinates, edges);
     }
 
     private static Coordinate ParseLine(string line)
@@ -49,7 +46,7 @@ internal static class InputParser
     }
 }
 
-internal sealed record CoordinatesAndScanLines(IList<Coordinate> Coordinates, IList<Edge> Edges);
+internal sealed record CoordinatesAndEdges(IList<Coordinate> Coordinates, IList<Edge> Edges);
 
 internal sealed record Coordinate(long X, long Y);
 
