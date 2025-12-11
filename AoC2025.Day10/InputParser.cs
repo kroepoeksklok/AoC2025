@@ -1,94 +1,85 @@
 ﻿using AoC2025.Day10.Properties;
-using System;
-using System.ComponentModel;
-using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AoC2025.Day10;
 
-internal static class InputParser
+internal static partial class InputParser
 {
-    public static object ParseInput()
+    public static IEnumerable<Machine> ParseInput()
     {
-
-        //var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay9a);
-        var inputString =
-@"[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
-[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
-[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}";
+        //var inputString = System.Text.Encoding.UTF8.GetString(Resources.InputDay10a);
+        //        var inputString =
+        //@"[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+        //[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
+        //[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}";
+        var inputString = "[#.#####] (2,3,4,6) (2,5) (1,3,4,5,6) (1,2,5,6) (0,5,6) (0,1,2,3,4,6) (1,2,3,5,6) (1,3,4,6) (0,2,3,4,5,6) {23,42,62,53,35,62,74}";
 
         var machines = new List<Machine>();
 
         var lines = inputString.Split(Environment.NewLine);
 
-        //for (int i = 0; i < lines.Length; i++)
-        //{
-        //    var machine = new Machine([], []);
-        //    machines.Add(machine);
+        for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
+        {
+            var line = lines[lineNumber];
+            List<int> buttons = [];
+            var matches = MachineRegex().Matches(line);
+            string desiredLightConfiguration = "";
+            int desiredLightMask = 0;
+            int buttonMask = 0;
+            int numberOfLights = 0;
+            List<int> joltages = [];
+            for (var i = 0; i < matches.Count; i++)
+            {
+                if (i == 0)
+                {
+                    desiredLightConfiguration = matches[i].Value;
 
-        //    var line = lines[i];
-        //    var lightIndex = 0;
+                    numberOfLights = desiredLightConfiguration.Length;
 
-        //    foreach(var c in line)
-        //    {
-        //        if (c == ' ' || c == ']') continue;
-        //        if (c == '[')
-        //        {
-        //            lightIndex = 0;
-        //        }
-        //        if( c == '.')
-        //        {
-        //            machine.DesiredConfiguration.Add(new LightConfiguration(i, State.Off));
-        //            lightIndex++;
-        //        }
-        //        if (c == '#')
-        //        {
-        //            machine.DesiredConfiguration.Add(new LightConfiguration(i, State.On));
-        //            lightIndex++;
-        //        }
-        //        if(c == '(')
-        //    }
-        //    var iCurrentCoordinate = lines[i];
-        //    string iNextCoordinate = i == lines.Length - 1 ? 
-        //        lines[0] : 
-        //        lines[i + 1];
+                    desiredLightMask = desiredLightConfiguration
+                        .Select((c, i) => c == '#' ? 1 << (numberOfLights - 1 - i) : 0)
+                         .Aggregate(0, (a, b) => a | b);
+                } 
+                else if (i == matches.Count - 1)
+                {
+                    var iJoltages = matches[i].Value;
+                    joltages = iJoltages.Split(',').Select(int.Parse).ToList();
+                } 
+                else
+                {
+                    var iToggledLights = matches[i].Value;
+                    var btns = iToggledLights.Split(',').Select(int.Parse).ToList();
+                    buttonMask = 0;
+                    foreach (int pos in btns)
+                    {
+                        buttonMask |= 1 << (numberOfLights - 1 - pos);
+                    }
+                    buttons.Add(buttonMask);
+                }
+            }
 
-        //    var currentCoordinate = ParseLine(iCurrentCoordinate);
-        //    var nextCoordinate = ParseLine(iNextCoordinate);
+            var machine = new Machine(numberOfLights, desiredLightMask, buttons, joltages);
+            machines.Add(machine);
+        }
 
-        //    edges.Add(new Edge(currentCoordinate, nextCoordinate));
-        //    coordinates.Add(currentCoordinate);
-        //}
-
-        //return new CoordinatesAndScanLines(coordinates, edges);
-        return null;
+        return machines;
     }
+
+    [GeneratedRegex("(?<=\\[).*?(?=\\])|(?<=\\().*?(?=\\))|(?<=\\{).*?(?=\\})")]
+    private static partial Regex MachineRegex();
 }
 
 internal sealed record Machine
 {
-    public IList<LightConfiguration> DesiredConfiguration { get; }
-    public IList<Button> Buttons { get; }
-    public IList<LightConfiguration> CurrentConfiguration { get; }
-
-    public Machine(IList<LightConfiguration> desiredConfiguration, IList<Button> buttons)
+    public IList<int> Buttons { get; }
+    public int DesiredLightConfiguration { get; }
+    public IList<int> RequiredJoltages { get; }
+    public int NumberOfLights { get; }
+    public Machine(int numberOfLights, int desiredLightConfiguration, IList<int> buttons, IList<int> joltages)
     {
-        DesiredConfiguration = desiredConfiguration;
+        NumberOfLights = numberOfLights;
+        DesiredLightConfiguration = desiredLightConfiguration;
         Buttons = buttons;
-
-        CurrentConfiguration = [];
-        for (var i = 0; 0 < DesiredConfiguration.Count; i++)
-        {
-            CurrentConfiguration.Add(new LightConfiguration(i, State.Off));
-        }
+        RequiredJoltages = joltages;
     }
 }
-
-internal sealed record LightConfiguration(int Index, State State);
-
-internal enum State
-{
-    Off = 0,
-    On = 1
-}
-
-internal sealed record Button(IEnumerable<int> Indices);
