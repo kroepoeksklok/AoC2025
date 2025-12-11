@@ -20,20 +20,21 @@ internal class Program
 
     private static void SolveB(IEnumerable<Surface> surfaces, IList<Edge> edges)
     {
-        Surface largestSurfaceArea = null;
+        Surface? largestSurfaceArea = null;
 
         foreach (var surface in surfaces.OrderByDescending(s => s.Area))
         {
             bool allCornersInPolygon = true;
-            foreach(var corner in surface.Corners)
+            foreach (var corner in surface.Corners)
             {
                 allCornersInPolygon &= IsPointInPolygon(corner, edges);
-                if (!allCornersInPolygon) { 
+                if (!allCornersInPolygon)
+                {
                     break;
                 }
             }
 
-            if(!allCornersInPolygon)
+            if (!allCornersInPolygon)
             {
                 continue;
             }
@@ -42,7 +43,7 @@ internal class Program
             var edgesIntersect = false;
             foreach (var surfaceEdge in surface.Edges)
             {
-                foreach(var edge in edges)
+                foreach (var edge in edges)
                 {
                     edgesIntersect = DoEdgesIntersect(edge, surfaceEdge);
                     if (edgesIntersect)
@@ -51,13 +52,13 @@ internal class Program
                     }
                 }
 
-                if(edgesIntersect)
+                if (edgesIntersect)
                 {
                     break;
                 }
             }
 
-            if (edgesIntersect) 
+            if (edgesIntersect)
             {
                 continue;
             }
@@ -66,7 +67,14 @@ internal class Program
             break;
         }
 
-        Console.WriteLine($"Answer 9B: {largestSurfaceArea.Area}");
+        if (largestSurfaceArea != null)
+        {
+            Console.WriteLine($"Answer 9B: {largestSurfaceArea.Area}");
+        }
+        else
+        {
+            Console.WriteLine("Answer 9B: no largest area found");
+        }
     }
 
     private static IEnumerable<Surface> CreateSurfaces(IList<Coordinate> coordinates)
@@ -90,16 +98,16 @@ internal class Program
     {
         foreach (var edge in edges)
         {
-            if(edge.FirstCoordinate.Y == edge.SecondCoordinate.Y)
+            if (edge.FirstCoordinate.Y == edge.SecondCoordinate.Y)
             {
                 // Horizontal
-                if(coordinate.Y == edge.FirstCoordinate.Y && 
+                if (coordinate.Y == edge.FirstCoordinate.Y &&
                    Math.Min(edge.FirstCoordinate.X, edge.SecondCoordinate.X) <= coordinate.X &&
                    coordinate.X <= Math.Max(edge.FirstCoordinate.X, edge.SecondCoordinate.X))
                 {
                     return true;
                 }
-            } 
+            }
             else if (edge.FirstCoordinate.X == edge.SecondCoordinate.X)
             {
                 // Vertical
@@ -113,17 +121,17 @@ internal class Program
         }
 
         bool inside = false;
-        foreach(var edge in edges)
+        foreach (var edge in edges)
         {
-            if(edge.FirstCoordinate.Y == edge.SecondCoordinate.Y)
+            if (edge.FirstCoordinate.Y == edge.SecondCoordinate.Y)
             {
                 continue;
             }
 
-            if(coordinate.Y >= Math.Min(edge.FirstCoordinate.Y, edge.SecondCoordinate.Y) && 
+            if (coordinate.Y >= Math.Min(edge.FirstCoordinate.Y, edge.SecondCoordinate.Y) &&
                 coordinate.Y < Math.Max(edge.FirstCoordinate.Y, edge.SecondCoordinate.Y))
             {
-                if(edge.FirstCoordinate.X > coordinate.X)
+                if (edge.FirstCoordinate.X > coordinate.X)
                 {
                     inside = !inside;
                 }
@@ -189,7 +197,7 @@ internal class Program
                 new Coordinate(FirstCorner.X, OppositeCorner.Y)
         ];
 
-        public decimal Area => 
+        public decimal Area =>
             (Math.Abs(FirstCorner.X - OppositeCorner.X) + 1) *
             (Math.Abs(FirstCorner.Y - OppositeCorner.Y) + 1);
 
