@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Linq;
-using System.Text;
+﻿using LpSolveDotNet;
+using System.Collections;
 
 namespace AoC2025.Day10;
 
@@ -21,7 +20,7 @@ internal class Program
         
         foreach(var machine in machines)
         {
-            var shortest = BFS(0, machine.DesiredLightConfiguration, machine.Buttons);
+            var shortest = BFS(0, machine.DesiredLightConfiguration, machine.Buttons.Select(b => b.Mask));
             Console.WriteLine($"Shortest path = {shortest}");
             sumShortests += shortest;
         }
@@ -29,7 +28,7 @@ internal class Program
         Console.WriteLine($"10A answer: {sumShortests}");
     }
 
-    public static int BFS(int start, int target, IList<int> buttonMasks)
+    public static int BFS(int start, int target, IEnumerable<int> buttonMasks)
     {
         var queue = new Queue<int>();
         var visited = new HashSet<int>();
@@ -65,47 +64,81 @@ internal class Program
 
     private static void SolveB(IEnumerable<Machine> machines)
     {
+        LpSolve.Init();
         var totalButtonPresses = 0;
+        const double Ignored = 0;
         foreach (var machine in machines)
         {
-            var currentJoltages = new int[machine.NumberOfLights];
-            var orderedButtons = machine.Buttons.OrderByDescending(b => b);
-            int buttonPresses = 0;
-            foreach (var button in orderedButtons)
+            var numberOfVariables = machine.Buttons.Count();
+            var numberOfConstraints = machine.RequiredJoltages.Count();
+            using (var lp = LpSolve.make_lp(numberOfConstraints, numberOfVariables))
             {
-                bool finishedWithButton = false;
-                do
+                lp.set_minim();
+
+                var buttons = new double[machine.Buttons.Count + 1];
+                buttons[0] = Ignored;
+                for(int i = 0; i < machine.Buttons.Count; i++)
                 {
-                    BitArray b = new([button]);
-                    var trues = GetTrueIndexes(b);
-                    foreach (var t in trues)
-                    {
-                        int joltageIndex = machine.NumberOfLights - t - 1;
-                        var currentJoltage = currentJoltages[joltageIndex];
-                        if (currentJoltage == machine.RequiredJoltages[joltageIndex])
-                        {
-                            finishedWithButton = true;
-                            break;
-                        }
-                    }
+                    buttons[i + 1] = 1;
+                }
 
-                    if (!finishedWithButton)
+                lp.set_obj_fn(buttons);
+
+                lp.set_add_rowmode(true);
+
+                for(int i = 0; i < machine.RequiredJoltages.Count; i++)
+                {
+                    var variables = new List<double>
                     {
-                        foreach (var t in trues)
+                        Ignored
+                    };
+
+                    for (int j = 0; j < machine.Buttons.Count; j++)
+                    {
+                        var button = machine.Buttons[j];
+                        if (button.ToggledIndices.Contains(i))
                         {
-                            int joltageIndex = machine.NumberOfLights - t - 1;
-                            currentJoltages[joltageIndex]++;
+                            variables.Add(1);
+                        } else
+                        {
+                            variables.Add(0);
                         }
-                        buttonPresses++;
                     }
-                } while (!finishedWithButton);
+                    lp.add_constraint(variables.ToArray(), lpsolve_constr_types.EQ, machine.RequiredJoltages[i]);
+                }
+
+                for(int i = 0; i < numberOfVariables; i++)
+                {
+                    lp.set_int(i, true);
+                }
+
+                lp.set_add_rowmode(false);
+                lp.set_verbose(lpsolve_verbosity.IMPORTANT);
+
+                lpsolve_return s = lp.solve();
+                if (s == lpsolve_return.OPTIMAL)
+                {
+                    var objective = lp.get_objective();
+                    var castedObjective = Convert.ToInt32(objective);
+                    Console.WriteLine("Objective value: " + lp.get_objective());
+                    //totalButtonPresses += Convert.ToInt32(lp.get_objective());
+                    var results = new double[numberOfVariables];
+                    lp.get_variables(results);
+                    for (int j = 0; j < numberOfVariables; j++)
+                    {
+                        var result = results[j];
+                        int castedResult = Convert.ToInt32(result);
+                        Console.WriteLine(lp.get_col_name(j + 1) + ": " + result);
+                        totalButtonPresses += castedResult;
+                    }
+                }
             }
-
-            Console.WriteLine($"Button presses: {buttonPresses}");
-            totalButtonPresses += buttonPresses;
         }
 
         // 15711 too low
+        // 17802 too low
+        // 18723 ???
+
         Console.WriteLine($"10B answer: {totalButtonPresses}");
     }
 
