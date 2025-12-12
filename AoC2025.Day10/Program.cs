@@ -1,5 +1,4 @@
 ﻿using LpSolveDotNet;
-using System.Collections;
 
 namespace AoC2025.Day10;
 
@@ -21,7 +20,6 @@ internal class Program
         foreach(var machine in machines)
         {
             var shortest = BFS(0, machine.DesiredLightConfiguration, machine.Buttons.Select(b => b.Mask));
-            Console.WriteLine($"Shortest path = {shortest}");
             sumShortests += shortest;
         }
 
@@ -119,35 +117,19 @@ internal class Program
                 if (s == lpsolve_return.OPTIMAL)
                 {
                     var objective = lp.get_objective();
-                    var castedObjective = Convert.ToInt32(objective);
-                    Console.WriteLine("Objective value: " + lp.get_objective());
-                    //totalButtonPresses += Convert.ToInt32(lp.get_objective());
+
                     var results = new double[numberOfVariables];
                     lp.get_variables(results);
                     for (int j = 0; j < numberOfVariables; j++)
                     {
                         var result = results[j];
                         int castedResult = Convert.ToInt32(result);
-                        Console.WriteLine(lp.get_col_name(j + 1) + ": " + result);
                         totalButtonPresses += castedResult;
                     }
                 }
             }
         }
 
-        // 15711 too low
-        // 17802 too low
-        // 18723 ???
-
         Console.WriteLine($"10B answer: {totalButtonPresses}");
     }
-
-    public static IEnumerable<int> GetTrueIndexes(BitArray arr)
-    {
-        if (arr != null)
-            return Enumerable.Range(0, arr.Count).Where(idx => arr.Get(idx));
-
-        return new int[0];
-    }
-
 }
