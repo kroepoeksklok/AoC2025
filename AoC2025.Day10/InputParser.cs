@@ -21,12 +21,9 @@ internal static partial class InputParser
         for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
         {
             var line = lines[lineNumber];
-            //List<int> ButtonMasks = [];
-            List<Button> Buttons = [];
+            List<Button> buttons = [];
             var matches = MachineRegex().Matches(line);
-            string desiredLightConfiguration = "";
             int desiredLightMask = 0;
-            int buttonMask = 0;
             int numberOfLights = 0;
             List<int> joltages = [];
 
@@ -34,7 +31,7 @@ internal static partial class InputParser
             {
                 if (i == 0)
                 {
-                    desiredLightConfiguration = matches[i].Value;
+                    var desiredLightConfiguration = matches[i].Value;
 
                     numberOfLights = desiredLightConfiguration.Length;
 
@@ -44,27 +41,25 @@ internal static partial class InputParser
                 }
                 else if (i == matches.Count - 1)
                 {
-                    var iJoltages = matches[i].Value;
-                    joltages = iJoltages.Split(',').Select(int.Parse).ToList();
+                    joltages = matches[i].Value.Split(',').Select(int.Parse).ToList();
                 }
                 else
                 {
                     List<int> indices = [];
-                    var iToggledLights = matches[i].Value;
-                    var btns = iToggledLights.Split(',').Select(int.Parse).ToList();
-                    buttonMask = 0;
+                    var btns = matches[i].Value.Split(',').Select(int.Parse).ToList();
+                    var buttonMask = 0;
+
                     foreach (int pos in btns)
                     {
                         indices.Add(pos);
                         buttonMask |= 1 << (numberOfLights - 1 - pos);
                     }
-                    Buttons.Add(new Button(indices, buttonMask));
-                    //ButtonMasks.Add(buttonMask);
+
+                    buttons.Add(new Button(indices, buttonMask));
                 }
             }
 
-            //var machine = new Machine(numberOfLights, desiredLightMask, ButtonMasks, joltages);
-            var machine = new Machine(numberOfLights, desiredLightMask, Buttons, joltages);
+            var machine = new Machine(numberOfLights, desiredLightMask, buttons, joltages);
             machines.Add(machine);
         }
 
@@ -74,24 +69,3 @@ internal static partial class InputParser
     [GeneratedRegex("(?<=\\[).*?(?=\\])|(?<=\\().*?(?=\\))|(?<=\\{).*?(?=\\})")]
     private static partial Regex MachineRegex();
 }
-
-internal sealed record Machine
-{
-    public IList<Button> Buttons { get; }
-
-    //public IList<int> ButtonMasks { get; }
-    public int DesiredLightConfiguration { get; }
-    public IList<int> RequiredJoltages { get; }
-    public int NumberOfLights { get; }
-    //public Machine(int numberOfLights, int desiredLightConfiguration, IList<int> buttonMasks, IList<int> joltages)
-    public Machine(int numberOfLights, int desiredLightConfiguration, IList<Button> buttons, IList<int> joltages)
-    {
-        NumberOfLights = numberOfLights;
-        DesiredLightConfiguration = desiredLightConfiguration;
-        //ButtonMasks = buttonMasks;
-        Buttons = buttons;
-        RequiredJoltages = joltages;
-    }
-}
-
-public sealed record Button(IEnumerable<int> ToggledIndices, int Mask);

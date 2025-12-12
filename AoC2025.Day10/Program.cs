@@ -68,7 +68,7 @@ internal class Program
         foreach (var machine in machines)
         {
             var numberOfVariables = machine.Buttons.Count();
-            var numberOfConstraints = machine.RequiredJoltages.Count();
+            var numberOfConstraints = machine.Joltages.Count();
             using (var lp = LpSolve.make_lp(numberOfConstraints, numberOfVariables))
             {
                 lp.set_minim();
@@ -84,7 +84,7 @@ internal class Program
 
                 lp.set_add_rowmode(true);
 
-                for(int i = 0; i < machine.RequiredJoltages.Count; i++)
+                for(int i = 0; i < machine.Joltages.Count; i++)
                 {
                     var variables = new List<double>
                     {
@@ -102,10 +102,10 @@ internal class Program
                             variables.Add(0);
                         }
                     }
-                    lp.add_constraint(variables.ToArray(), lpsolve_constr_types.EQ, machine.RequiredJoltages[i]);
+                    lp.add_constraint(variables.ToArray(), lpsolve_constr_types.EQ, machine.Joltages[i]);
                 }
 
-                for(int i = 0; i < numberOfVariables; i++)
+                for(int i = 1; i < numberOfVariables; i++)
                 {
                     lp.set_int(i, true);
                 }
