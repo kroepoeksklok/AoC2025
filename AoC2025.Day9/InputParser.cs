@@ -45,9 +45,3 @@ internal static class InputParser
         return new Coordinate(long.Parse(boundary[0]), long.Parse(boundary[1]));
     }
 }
-
-internal sealed record CoordinatesAndEdges(IList<Coordinate> Coordinates, IList<Edge> Edges);
-
-internal sealed record Coordinate(long X, long Y);
-
-internal sealed record Edge(Coordinate FirstCoordinate, Coordinate SecondCoordinate);

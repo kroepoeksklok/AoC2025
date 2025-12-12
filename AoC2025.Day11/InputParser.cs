@@ -1,5 +1,4 @@
 ﻿using AoC2025.Day11.Properties;
-using System.Text.RegularExpressions;
 
 namespace AoC2025.Day11;
 
@@ -68,9 +67,4 @@ internal static partial class InputParser
 
         return existingNode;
     }
-}
-
-public sealed record Node(int Index, string Label)
-{
-    public List<Node> AdjacentNodes { get; } = [];
 }
