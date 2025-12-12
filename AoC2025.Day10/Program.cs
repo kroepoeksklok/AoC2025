@@ -1,4 +1,5 @@
 ﻿using LpSolveDotNet;
+using System.Diagnostics;
 
 namespace AoC2025.Day10;
 
@@ -9,8 +10,19 @@ internal class Program
         Console.WriteLine("Hello, World!");
         var machines = InputParser.ParseInput();
 
+        Stopwatch sw = new();
+
+        sw.Start();
         SolveA(machines);
+        sw.Stop();
+        var aDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {aDuration} ms");
+
+        sw.Restart();
         SolveB(machines);
+        sw.Stop();
+        var bDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {bDuration} ms");
     }
 
     private static void SolveA(IEnumerable<Machine> machines)

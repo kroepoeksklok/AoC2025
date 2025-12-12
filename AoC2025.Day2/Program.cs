@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace AoC2025.Day2;
 
@@ -9,8 +10,19 @@ internal class Program
         Console.WriteLine("Hello, World!");
         var ranges = InputParser.ParseInput();
 
+        Stopwatch sw = new();
+
+        sw.Start();
         SolveA(ranges);
+        sw.Stop();
+        var aDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {aDuration} ms");
+
+        sw.Restart();
         SolveB(ranges);
+        sw.Stop();
+        var bDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {bDuration} ms");
     }
 
     private static void SolveA(IEnumerable<InputRange> ranges)

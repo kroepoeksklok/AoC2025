@@ -1,4 +1,6 @@
-﻿namespace AoC2025.Day7;
+﻿using System.Diagnostics;
+
+namespace AoC2025.Day7;
 
 internal class Program
 {
@@ -7,8 +9,19 @@ internal class Program
         Console.WriteLine("Hello, World!");
         var manifold = InputParser.ParseInput();
 
+        Stopwatch sw = new();
+
+        sw.Start();
         SolveA(manifold);
+        sw.Stop();
+        var aDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {aDuration} ms");
+
+        sw.Restart();
         SolveB(manifold);
+        sw.Stop();
+        var bDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {bDuration} ms");
     }
 
     private static void SolveA(char[,] manifold)

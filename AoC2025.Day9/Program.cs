@@ -1,4 +1,6 @@
-﻿namespace AoC2025.Day9;
+﻿using System.Diagnostics;
+
+namespace AoC2025.Day9;
 
 internal class Program
 {
@@ -8,8 +10,19 @@ internal class Program
         var coordinatesAndEdges = InputParser.ParseInput();
 
         var surfaces = CreateSurfaces(coordinatesAndEdges.Coordinates);
+        Stopwatch sw = new();
+
+        sw.Start();
         SolveA(surfaces);
+        sw.Stop();
+        var aDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {aDuration} ms");
+
+        sw.Restart();
         SolveB(surfaces, coordinatesAndEdges.Edges);
+        sw.Stop();
+        var bDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {bDuration} ms");
     }
 
     private static void SolveA(IEnumerable<Surface> surfaces)

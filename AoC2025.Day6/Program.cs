@@ -1,4 +1,6 @@
-﻿namespace AoC2025.Day6;
+﻿using System.Diagnostics;
+
+namespace AoC2025.Day6;
 
 internal class Program
 {
@@ -8,8 +10,19 @@ internal class Program
         var mathProblems = InputParser.ParseInput();
         var mathProblems2 = InputParser.ParseInput2();
 
+        Stopwatch sw = new();
+
+        sw.Start();
         SolveA(mathProblems);
+        sw.Stop();
+        var aDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {aDuration} ms");
+
+        sw.Restart();
         SolveB(mathProblems2);
+        sw.Stop();
+        var bDuration = sw.ElapsedTicks / 10000d;
+        Console.WriteLine($"Duration {bDuration} ms");
     }
 
     private static void SolveA(IEnumerable<MathProblem> mathProblems)
